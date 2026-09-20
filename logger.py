@@ -1,59 +1,32 @@
-from database import get_session
-from models import BotLog
+import logging
+import os
 
 
-def log_message(level, message):
-    """
-    Save a bot log message to the database.
-    """
+LOG_LEVEL = os.getenv(
+    "LOG_LEVEL",
+    "INFO"
+).upper()
 
-    session = get_session()
 
-    try:
+logging.basicConfig(
+    level=getattr(logging, LOG_LEVEL, logging.INFO),
+    format=(
+        "%(asctime)s | "
+        "%(levelname)s | "
+        "%(name)s | "
+        "%(message)s"
+    )
+)
 
-        log = BotLog(
-            level=level,
-            message=message
+
+logger = logging.getLogger("womens-sports-bot")
+
+
+def get_logger(name=None):
+
+    if name:
+        return logging.getLogger(
+            f"womens-sports-bot.{name}"
         )
 
-        session.add(log)
-        session.commit()
-
-        print(f"[{level}] {message}")
-
-    finally:
-
-        session.close()
-
-
-def log_info(message):
-    """
-    Save an informational message.
-    """
-
-    log_message(
-        "INFO",
-        message
-    )
-
-
-def log_warning(message):
-    """
-    Save a warning message.
-    """
-
-    log_message(
-        "WARNING",
-        message
-    )
-
-
-def log_error(message):
-    """
-    Save an error message.
-    """
-
-    log_message(
-        "ERROR",
-        message
-    )
+    return logger

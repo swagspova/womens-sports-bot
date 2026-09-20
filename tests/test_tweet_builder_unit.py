@@ -3,12 +3,16 @@ from database import (
     get_completed_games,
 )
 
+from bot.tweet_builder import (
+    build_final_score_tweet,
+)
+
 
 def main():
 
     print("\n")
     print("=" * 60)
-    print("COMPLETED GAMES TEST")
+    print("TWEET BUILDER TEST")
     print("=" * 60)
 
     session = get_session()
@@ -26,28 +30,39 @@ def main():
 
         for game in games:
 
-            print()
+            print("\n")
             print("-" * 60)
 
             print(
-                f"ESPN ID: "
-                f"{game.espn_game_id}"
-            )
-
-            print(
+                f"Game: "
                 f"{game.away_team} "
                 f"{game.away_score} - "
                 f"{game.home_score} "
                 f"{game.home_team}"
             )
 
+            tweet = build_final_score_tweet(
+                game
+            )
+
+            print("\nGenerated Tweet:")
+            print("-" * 60)
+
+            print(tweet.text)
+
+            print("-" * 60)
+
             print(
-                f"Status: {game.status}"
+                f"Characters: "
+                f"{len(tweet.text)}"
             )
 
             print(
-                f"Posted: {game.posted}"
+                f"Game ID: "
+                f"{tweet.game_id}"
             )
+
+            print("-" * 60)
 
     finally:
 

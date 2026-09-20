@@ -1,15 +1,29 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from datetime import datetime
+
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Integer,
+    String,
+    Text,
+)
 
 from database.db import Base
 
 
+# =========================================================
+# GAME MODEL
+# =========================================================
+
 class Game(Base):
+
     __tablename__ = "games"
 
     id = Column(
         Integer,
         primary_key=True,
-        index=True
+        autoincrement=True
     )
 
     espn_game_id = Column(
@@ -19,9 +33,19 @@ class Game(Base):
         index=True
     )
 
+    sport = Column(
+        String,
+        nullable=False
+    )
+
+    league = Column(
+        String,
+        nullable=False
+    )
+
     game_date = Column(
         DateTime,
-        nullable=False
+        nullable=True
     )
 
     away_team = Column(
@@ -49,12 +73,105 @@ class Game(Base):
         nullable=False
     )
 
-    def __repr__(self):
-        return (
-            f"<Game("
-            f"{self.away_team} "
-            f"{self.away_score} - "
-            f"{self.home_score} "
-            f"{self.home_team}"
-            f")>"
-        )
+    posted = Column(
+        Boolean,
+        default=False,
+        nullable=False
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
+
+    updated_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False
+    )
+
+
+# =========================================================
+# TWEET MODEL
+# =========================================================
+
+class Tweet(Base):
+
+    __tablename__ = "tweets"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        autoincrement=True
+    )
+
+    game_id = Column(
+        String,
+        nullable=False,
+        index=True
+    )
+
+    tweet_id = Column(
+        String,
+        nullable=True,
+        unique=True
+    )
+
+    tweet_type = Column(
+        String,
+        nullable=False
+    )
+
+    tweet_text = Column(
+        Text,
+        nullable=False
+    )
+
+    status = Column(
+        String,
+        nullable=False
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
+
+    posted_at = Column(
+        DateTime,
+        nullable=True
+    )
+
+
+# =========================================================
+# BOT LOG MODEL
+# =========================================================
+
+class BotLog(Base):
+
+    __tablename__ = "bot_logs"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        autoincrement=True
+    )
+
+    level = Column(
+        String,
+        nullable=False
+    )
+
+    message = Column(
+        Text,
+        nullable=False
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
