@@ -1,15 +1,26 @@
+import os
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 
-DATABASE_URL = "sqlite:///./womens_sports.db"
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "sqlite:///./womens_sports.db"
+)
+
+
+connect_args = {}
+
+if DATABASE_URL.startswith("sqlite"):
+    connect_args = {
+        "check_same_thread": False
+    }
 
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args={
-        "check_same_thread": False
-    }
+    connect_args=connect_args
 )
 
 
@@ -20,18 +31,5 @@ SessionLocal = sessionmaker(
 )
 
 
-Base = declarative_base()
-
-
 def get_session():
-
     return SessionLocal()
-
-
-def init_db():
-
-    from database import models
-
-    Base.metadata.create_all(
-        bind=engine
-    )

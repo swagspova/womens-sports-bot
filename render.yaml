@@ -1,0 +1,22 @@
+services:
+
+  - type: cron
+    name: womens-sports-bot
+    runtime: python
+
+    schedule: "0 * * * *"
+
+    buildCommand: pip install -r requirements.txt
+
+    startCommand: python run_bot.py
+
+    envVars:
+
+      - key: DATABASE_URL
+        sync: false
+
+      - key: TWITTER_ENABLED
+        value: "true"
+
+      - key: X_USER_ACCESS_TOKEN
+        sync: false

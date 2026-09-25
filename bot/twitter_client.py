@@ -1,110 +1,74 @@
 import os
-
-from dotenv import load_dotenv
-
-
-load_dotenv()
+import requests
 
 
 class TwitterClient:
-    """
-    Handles publishing tweets to X/Twitter.
 
-    During Day 5 development, DRY RUN mode is used
-    so no real tweet is published.
-    """
+    API_URL = "https://api.x.com/2/tweets"
 
     def __init__(self):
+        self.enabled = os.getenv(
+            "TWITTER_ENABLED",
+            "false"
+        ).lower() == "true"
 
-        self.dry_run = (
-            os.getenv(
-                "TWITTER_DRY_RUN",
-                "true"
-            ).lower()
-            == "true"
+        self.access_token = os.getenv(
+            "X_USER_ACCESS_TOKEN"
         )
-
-        self.client = None
-
-        if not self.dry_run:
-
-            import tweepy
-
-            api_key = os.getenv(
-                "TWITTER_API_KEY"
-            )
-
-            api_secret = os.getenv(
-                "TWITTER_API_SECRET"
-            )
-
-            access_token = os.getenv(
-                "TWITTER_ACCESS_TOKEN"
-            )
-
-            access_token_secret = os.getenv(
-                "TWITTER_ACCESS_TOKEN_SECRET"
-            )
-
-            if not all([
-                api_key,
-                api_secret,
-                access_token,
-                access_token_secret
-            ]):
-
-                raise ValueError(
-                    "Twitter credentials are missing."
-                )
-
-            self.client = tweepy.Client(
-                consumer_key=api_key,
-                consumer_secret=api_secret,
-                access_token=access_token,
-                access_token_secret=access_token_secret
-            )
 
     def post_tweet(self, text):
+        """
+        Publish a text post to X.
 
-        if not text:
+        Returns:
+            dict containing the API response
+        """
 
-            raise ValueError(
-                "Tweet text cannot be empty."
-            )
-
-        if len(text) > 280:
-
-            raise ValueError(
-                "Tweet exceeds 280 characters."
-            )
-
-        if self.dry_run:
-
-            print()
-            print("=" * 60)
-            print("TWITTER DRY RUN")
-            print("=" * 60)
-
-            print("\nTweet that would be posted:\n")
-
+        if not self.enabled:
+            print("\nDRY RUN - Tweet:")
             print(text)
-
-            print("\n" + "=" * 60)
-
             return {
                 "success": True,
-                "tweet_id": None,
-                "dry_run": True
+                "dry_run": True,
+                "tweet_id": None
             }
 
-        response = self.client.create_tweet(
-            text=text
+        if not self.access_token:
+            raise RuntimeError(
+                "X_USER_ACCESS_TOKEN is not configured"
+            )
+
+        response = requests.post(
+            self.API_URL,
+            headers={
+                "Authorization": (
+                    f"Bearer {self.access_token}"
+                ),
+                "Content-Type": "application/json"
+            },
+            json={
+                "text": text
+            },
+            timeout=30
         )
 
-        tweet_id = response.data["id"]
+        if not response.ok:
+            raise RuntimeError(
+                f"X API error "
+                f"{response.status_code}: "
+                f"{response.text}"
+            )
+
+        data = response.json()
+
+        tweet_id = data["data"]["id"]
+
+        print(
+            f"Tweet posted successfully: {tweet_id}"
+        )
 
         return {
             "success": True,
-            "tweet_id": str(tweet_id),
-            "dry_run": False
+            "dry_run": False,
+            "tweet_id": tweet_id
         }

@@ -3,47 +3,48 @@ from bot.api.espn import get_wnba_games
 
 def main():
 
-    print("\n")
-    print("=" * 60)
+    print()
+    print("=" * 70)
     print("ESPN WNBA API TEST")
-    print("=" * 60)
+    print("=" * 70)
 
     games = get_wnba_games()
 
     print(
-        f"\nGames received from ESPN: "
+        f"Games received from ESPN: "
         f"{len(games)}"
     )
 
-    for event in games:
+    assert isinstance(
+        games,
+        list
+    )
 
-        print("\n")
-        print("-" * 60)
+    for game in games:
+
+        print()
+        print(
+            f"{game['away_team']} "
+            f"{game['away_score']} - "
+            f"{game['home_score']} "
+            f"{game['home_team']}"
+        )
 
         print(
             f"ESPN ID: "
-            f"{event.get('id')}"
+            f"{game['espn_game_id']}"
         )
 
         print(
-            f"Name: "
-            f"{event.get('name')}"
+            f"Status: "
+            f"{game['status']}"
         )
 
-        status = (
-            event
-            .get("status", {})
-            .get("type", {})
-            .get("name")
-        )
-
-        print(
-            f"Status: {status}"
-        )
-
-    print("\nESPN TEST COMPLETE")
+    print()
+    print(
+        "ESPN TEST PASSED"
+    )
 
 
 if __name__ == "__main__":
-
     main()

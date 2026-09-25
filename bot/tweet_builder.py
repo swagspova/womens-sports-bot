@@ -6,75 +6,137 @@ MAX_TWEET_LENGTH = 280
 
 @dataclass
 class Tweet:
-
     text: str
-
-    game_id: str
+    game_id: int
 
 
 def build_final_score_tweet(game):
+    """
+    Build a WNBA final-score tweet.
 
-    if game.status != "STATUS_FINAL":
+    Includes:
+    - Final score
+    - Winning team
+    - Top 2 performers
+    - Points
+    - Assists
+    - Rebounds
+    """
 
-        raise ValueError(
-            "Cannot build a final-score tweet "
-            "for a non-final game."
-        )
+    # --------------------------------------------------------
+    # DETERMINE WINNER
+    # --------------------------------------------------------
 
-    if game.home_score > game.away_score:
-
-        winner = game.home_team
-
-    elif game.away_score > game.home_score:
-
+    if game.away_score > game.home_score:
         winner = game.away_team
 
-    else:
+    elif game.home_score > game.away_score:
+        winner = game.home_team
 
+    else:
         winner = None
 
+    # --------------------------------------------------------
+    # BASE TWEET
+    # --------------------------------------------------------
+
+    lines = [
+        "🏀 WNBA FINAL SCORE",
+        "",
+        (
+            f"{game.away_team} "
+            f"{game.away_score} - "
+            f"{game.home_score} "
+            f"{game.home_team}"
+        ),
+        "",
+    ]
+
+    # --------------------------------------------------------
+    # WINNER
+    # --------------------------------------------------------
+
     if winner:
-
-        text = (
-
-            f"🏀 WNBA FINAL SCORE\n\n"
-
-            f"{game.away_team} "
-            f"{game.away_score}\n"
-
-            f"{game.home_team} "
-            f"{game.home_score}\n\n"
-
-            f"🏆 {winner}"
-
+        lines.append(
+            f"🏆 Winner: {winner}"
         )
-
     else:
-
-        text = (
-
-            f"🏀 WNBA FINAL SCORE\n\n"
-
-            f"{game.away_team} "
-            f"{game.away_score}\n"
-
-            f"{game.home_team} "
-            f"{game.home_score}\n\n"
-
-            f"🤝 Tied"
-
+        lines.append(
+            "🤝 Result: Tie"
         )
+
+    # --------------------------------------------------------
+    # TOP PERFORMERS
+    # --------------------------------------------------------
+
+    top_players = []
+
+    if game.top_player_1_name:
+        top_players.append(
+            (
+                game.top_player_1_name,
+                game.top_player_1_points,
+                game.top_player_1_assists,
+                game.top_player_1_rebounds,
+            )
+        )
+
+    if game.top_player_2_name:
+        top_players.append(
+            (
+                game.top_player_2_name,
+                game.top_player_2_points,
+                game.top_player_2_assists,
+                game.top_player_2_rebounds,
+            )
+        )
+
+    # --------------------------------------------------------
+    # ADD PLAYERS TO TWEET
+    # --------------------------------------------------------
+
+    if top_players:
+
+        lines.extend(
+            [
+                "",
+                "⭐ Top Performers",
+            ]
+        )
+
+        for (
+            name,
+            points,
+            assists,
+            rebounds,
+        ) in top_players:
+
+            lines.append(
+                (
+                    f"{name} - "
+                    f"{points} PTS | "
+                    f"{assists} AST | "
+                    f"{rebounds} REB"
+                )
+            )
+
+    # --------------------------------------------------------
+    # BUILD FINAL TEXT
+    # --------------------------------------------------------
+
+    text = "\n".join(lines)
+
+    # --------------------------------------------------------
+    # CHECK X/TWITTER CHARACTER LIMIT
+    # --------------------------------------------------------
 
     if len(text) > MAX_TWEET_LENGTH:
-
         raise ValueError(
-            "Tweet exceeds 280 characters."
+            f"Tweet is {len(text)} characters. "
+            f"Maximum allowed is {MAX_TWEET_LENGTH}."
         )
 
     return Tweet(
-
         text=text,
-
-        game_id=game.espn_game_id
-
+        game_id=game.id,
     )

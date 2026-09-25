@@ -1,16 +1,22 @@
-.env
+# Virtual environment
 venv/
-__pycache__/
-*.pyc
-womens_sports.dbvenv/
+.venv/
+
+# Environment variables
 .env
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
 .pytest_cache/
-.DS_Store
 
-womens_sports.db
+# SQLite
 *.db
+*.sqlite
+*.sqlite3
 
-.idea/
-.vscode/
+# Logs
+logs/*.log
+
+# macOS
+.DS_Store
